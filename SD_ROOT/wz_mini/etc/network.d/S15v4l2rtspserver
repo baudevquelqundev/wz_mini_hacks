@@ -95,10 +95,10 @@ case "$1" in
 
 			if [[ "$RTSP_AUTH_DISABLE" == "true" ]]; then
 				echo "Starting RTSP server"
-				LD_LIBRARY_PATH=/opt/wz_mini/lib LD_PRELOAD=/system/lib/libsetunbuf.so /opt/wz_mini/bin/v4l2rtspserver $AUDIO_CH $AUDIO_FMT -F0 -P "$RTSP_PORT" $DEVICE1 $DEVICE2 > $RTSP.log 2>&1 &
+				LD_LIBRARY_PATH=/opt/wz_mini/lib LD_PRELOAD=/system/lib/libsetunbuf.so /opt/wz_mini/bin/v4l2rtspserver $AUDIO_CH $AUDIO_FMT -F0 -P "$RTSP_PORT" $DEVICE1 $DEVICE2 &
 			else
 				echo "Starting RTSP server"
-				LD_LIBRARY_PATH=/opt/wz_mini/lib LD_PRELOAD=/system/lib/libsetunbuf.so /opt/wz_mini/bin/v4l2rtspserver $AUDIO_CH $AUDIO_FMT -F0 -U "$RTSP_LOGIN":"$RTSP_PASSWORD" -P "$RTSP_PORT" $DEVICE1 $DEVICE2 > $RTSP.log 2>&1 &
+				LD_LIBRARY_PATH=/opt/wz_mini/lib LD_PRELOAD=/system/lib/libsetunbuf.so /opt/wz_mini/bin/v4l2rtspserver $AUDIO_CH $AUDIO_FMT -F0 -U "$RTSP_LOGIN":"$RTSP_PASSWORD" -P "$RTSP_PORT" $DEVICE1 $DEVICE2  &
 			fi
 
 			sleep 1
