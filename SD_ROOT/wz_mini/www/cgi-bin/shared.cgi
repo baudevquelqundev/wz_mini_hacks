@@ -1,22 +1,85 @@
 #!/bin/sh
 # This provides shared values for webpages
-base_dir=/opt/wz_mini/
-base_hack_ini=/opt/wz_mini/wz_mini.conf
-hack_ini=$base_hack_ini
-www_dir=/opt/wz_mini/www/cgi-bin/
 
-if [ -f /opt/wz_mini/tmp/.T31 ]; then
-  camtype=T31
-  camfirmware=$(tail -n1 /configs/app.ver | cut -f2 -d=  )
-  base_cam_config="/configs/.user_config"
-elif [ -f /opt/wz_mini/tmp/.T20 ]; then
-  camtype=T20
-  camfirmware=$(tail -n1 /system/bin/app.ver | cut -f2 -d= )
-  base_cam_config="/configs/.parameters"
+
+base_dir="/opt/wz_mini"
+tmp_dir="$base_dir/tmp"
+base_hack_ini="$base_dir/wz_mini.conf"
+hack_ini="$base_hack_ini"
+www_dir="$base_dir/www/cgi-bin/"
+www_env="$tmp_dir/www_env.sh"
+
+function find_TZ_from_latest {
+  Fday=$(ls "$recpath" -t | head -n1)
+  Fhour=$(ls "$recpath/$Fday" -t | head -n1)
+  Fmin=$(ls "$recpath/$Fday/$Fhour" -t | head -n1 | cut -d '.' -f 1)
+  Dmin=$(( $(date +%M) - 1 ))
+
+  if [ "$Fmin" -ne "$Dmin" ]; then
+    echo "minute is offset ... $Fmin vs $Dmin "
+  fi
+  if [ "$Fday" -lt $(date +%d) ]; then
+    Fshift=$((10#$Fhour - 10#$(date +%H)))
+  else
+    Fshift=$((10#$(date +%H) - 10#$Fhour))
+  fi
+  padFshift=$(printf "%03d" "$Fshift")
+  echo "UTC$padFshift:00"
+}
+
+function decipher_TZ
+{
+  dTZ=$(find_TZ_from_latest)
+#  if [ "$sysTZ" == "$dTZ" ]; then
+#     echo "matched across system method and file method"
+#  else
+#     echo "from system: 'x'$sysTZ'x' and from files: 'x'$dTZ'x'"
+#  fi
+  echoset "TZ" "$dTZ"
+}
+
+function echoset
+{  
+  eval "$1='$2'"
+  echo "$1"="\"$2\"" >>  "$www_env"
+}
+
+function compose_www_env
+{
+	if [ -f "$tmp_dir/.T31" ]; then
+  		echoset "camtype" "T31"
+  		echoset "base_cam_config" "/configs/.user_config"
+                echoset "camfirmware" $(tail -n1 /configs/app.ver | cut -f2 -d=  )
+	elif [ -f "$tmp_dir/.T20" ]; then
+  		echoset "camtype" "T20"
+		echoset "base_cam_config" "/configs/.parameters"
+                echoset "camfirmware" $(tail -n1 /system/bin/app.ver | cut -f2 -d= )
+	fi
+ 
+        echoset "cammodel" $(/opt/wz_mini/etc/init.d/s04model start | grep detected | cut -f1 -d ' ' )
+	echoset camver "$camtype($cammodel)"
+	echoset hackver "$(cat /opt/wz_mini/usr/bin/app.ver)"
+	echoset gpiopath "/sys/devices/virtual/gpio"
+	echoset recpath '/opt/record/';
+	echoset sysTZ $(cat /etc/TZ)
+	decipher_TZ "$sysTZ"
+}
+
+function read_www_env
+{
+. "$www_env" 
+}
+
+if [ ! -f "$www_env" ]; then
+  compose_www_env
+else
+  read_www_env
 fi
-cam_config=$base_cam_config
 
-cammodel=$(/opt/wz_mini/etc/init.d/s04model start | grep detected | cut -f1 -d ' ' )
+
+
+cam_config="$base_cam_config"
+
 
 camver="$camtype($cammodel)"
 
@@ -24,6 +87,7 @@ hackver=$(cat /opt/wz_mini/usr/bin/app.ver)
 
 ipaddr=$(ifconfig wlan0  | grep inet | cut -d ':' -f2 | cut -d ' ' -f0)
 macaddr=$(ifconfig wlan0  | grep HWaddr | cut -d 'HW' -f2 | cut -d ' ' -f2)
+
 
 function handle_css
 {
@@ -33,15 +97,14 @@ echo -ne '</style>';
 }
 
 
-
 function version_info
 {          
  echo "<div id='$1'>"
+ echo '<div class="github_link" ><a target="_new" href="https://github.com/gtxaspec/wz_mini_hacks">GitHub: wz_mini_hack</a></div>';
  echo "<div class='ver_DIV' vertype='Model'>$camver</div>"
  echo "<div class='ver_DIV' vertype='Firmware'>$camfirmware</div>"
  echo "<div class='ver_DIV' vertype='wz_mini'>$hackver</div>"
  echo "<div class='ver_DIV' vertype='Hostname'> $HOSTNAME</div>"
- echo '<div class="github_link" ><a target="_new" href="https://github.com/gtxaspec/wz_mini_hacks">Project</a></div>';
  echo "</div>"
 }
 
@@ -111,3 +174,40 @@ urldecode(){
  echo -e "$b"
 }
 
+
+stringContain() { [ -z "${2##*$1*}" ] && [ -z "$1" -o -n "$2" ]; }
+
+
+test_area_access()
+{
+echo -ne "search: $1\r\n"
+values=$(cat "$base_hack_ini" | grep "WEB_SERVER_OPTIONS" | cut -f2 -d=  ) 
+
+
+if [ -z "$values" ]
+then
+	values="cam config car jpeg"
+fi
+
+
+if [[ "$values" =~ "$1" ]]
+then
+        :
+else
+
+        echo "HTTP/1.1 200"
+        echo -e "Content-type: text/html\n\n"
+        echo ""
+	echo "<html><head><title>Access Denied</title>"
+	handle_css config.css
+	echo "</head><body>"
+        echo "<h1>access denied to $1</h1>"
+        echo "<div>access allowed for : $values</div>"
+        echo "you need to enable access using wz_mini.conf WEB_SERVER_OPTIONS "
+	version_info display_BAR
+	echo "</body></html>"
+        exit
+fi
+
+
+}
