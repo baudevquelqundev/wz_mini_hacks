@@ -1,28 +1,29 @@
 #!/bin/sh
+set -e
 
 mkdaemon() {
-    # dmon options
-    #   --stderr-redir  Redirects stderr to the log file as well
-    #   --max-respawns  Sets the number of times dmon will restart a failed process
-    #   --environ       Sets an environment variable. Used to remove buffering on stdout
+    # dmon options:
+    #   --stderr-redir  Redirect stderr to the log file as well
+    #   --max-respawns  Number of times dmon will restart a failed process
+    #   --environ       Set environment variable (disable buffering with LD_PRELOAD=libsetunbuf.so)
     #
-    # dslog options
-    #   --priority      The syslog priority. Set to DEBUG as these are just the stdout of the 
-    #   --max-files     The number of logs that will exist at once
-    #
-    max_respawns=$1
+    # dslog options (commented here, add if needed):
+    #   --priority      Syslog priority
+    #   --max-files     Number of rotated logs to keep
+
+    local max_respawns=$1
     shift
-    daemon_name=$1
+    local daemon_name=$1
     shift
+
     dmon \
-      --max-respawns $max_respawns \
+      --max-respawns "$max_respawns" \
       --environ "LD_PRELOAD=libsetunbuf.so" \
-      $@ \
-        $daemon_name
+      "$@" \
+      "$daemon_name"
 }
 
+# Lancer les daemons MQTT avec 0 redémarrage automatique
 mkdaemon 0 mqtt-control /media/mmc/mosquitto/bin/mqtt-control.sh
 mkdaemon 0 mqtt-status /media/mmc/mosquitto/bin/mqtt-status.sh
 mkdaemon 0 mqtt-autodiscovery /media/mmc/mosquitto/bin/mqtt-autodiscovery.sh
-
-
