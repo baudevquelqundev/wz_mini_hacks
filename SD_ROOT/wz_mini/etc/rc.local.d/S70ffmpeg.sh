@@ -24,7 +24,7 @@ httpd -p 8081 -h /tmp/record/ -r "auth" -c /tmp/httpd.conf
 #!/bin/sh
 
 # Commande FFMPEG à lancer
-cmd="/opt/wz_mini/bin/ffmpeg -rtsp_transport udp -y -i rtsp://127.0.0.1:8554/1080p \
+cmd="/opt/wz_mini/bin/ffmpeg -rtsp_transport tcp -y -i rtsp://127.0.0.1:8554/1080p \
   -c:v copy -coder 1 -pix_fmt yuv420p -g 30 -bf 0 \
   -c:a libfdk_aac -afterburner 1 -channels 1 -b:a 128k -profile:a aac_he -ar 16000 \
   -strict experimental -aspect 16:9 \
