@@ -25,12 +25,12 @@ httpd -p 8081 -h /tmp/record/ -r "auth" -c /tmp/httpd.conf
 
 # Commande FFMPEG à lancer
 cmd="/opt/wz_mini/bin/ffmpeg -rtsp_transport tcp -y -i rtsp://127.0.0.1:8554/1080p \
-  -c:v copy -coder 1 -pix_fmt yuv420p -g 30 -bf 0 \
-  -c:a libfdk_aac -afterburner 1 -channels 1 -b:a 128k -profile:a aac_he -ar 16000 \
-  -strict experimental -aspect 16:9 \
-  -f segment -segment_list /tmp/record/playlist/list.txt -segment_list_type flat \
+  -c:v copy -pix_fmt yuv420p -g 30 -bf 0 \
+  -f segment \
+  -segment_list /tmp/record/playlist/list.txt -segment_list_type flat \
   -segment_list_size 5 -segment_wrap 5 -segment_time 10 -reset_timestamps 1 \
   /tmp/record/stream_%d.mp4 -hide_banner -loglevel error"
+
 
 # Fichier log d'erreurs
 LOGFILE="/tmp/ffmpeg_loop.log"
