@@ -25,3 +25,7 @@ streams:
 #  - exec:ffmpeg -hide_banner -f alsa -ac 1 -i dsnooper2 -c:a libopus -muxdelay 0 -muxpreload 0 -ac:a 1 -af adelay=0|0 -f rtsp {output}
   # jpeg_1080p: http://127.0.0.1/cgi-bin/jpeg.cgi?channel=0
   # jpeg_360p: http://127.0.0.1/cgi-bin/jpeg.cgi?channel=1
+rtsp:
+  listen: ":8554"    # RTSP Server TCP port, default - 8554
+  username: "yvrench"  # optional, default - disabled
+  password: "ithadufmonlucarg"   # optional, default - disabled
