@@ -15,7 +15,6 @@ check_command() {
 check_command tail
 check_command awk
 check_command /opt/wz_mini/inotifywait
-check_command "${MOSQUITTO_PUB_BIN:-mosquitto_pub}"
 
 # === Chargement des fichiers de configuration ===
 MASTER_CONFIG="/opt/wz_mini/wz_mini.conf"
