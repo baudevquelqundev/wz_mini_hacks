@@ -7,21 +7,21 @@ MASTER_CONFIG="/opt/wz_mini/wz_mini.conf"
 source "${MASTER_CONFIG}"
 
 # Création du fichier de configuration HTTP avec authentification
+# Le fichier de configuration pour le mot de passe
 conffile="/tmp/httpd.conf"
-if [[ -f "$conffile" ]]; then
-    rm "$conffile"
+if [[ -f $conffile ]]; then
+    rm $conffile
 fi
 
-# Générer le hash du mot de passe pour httpd via busybox
 webpassword=$(busybox httpd -m "${RTSP_PASSWORD}")
-authline="/:${RTSP_LOGIN}:${webpassword}"
+authline="/:${RTSP_LOGIN}:$webpassword"
 
-cat <<EOF > "$conffile"
+cat <<EOF > $conffile
 $authline
 EOF
 
-# Lancer le serveur HTTP sur le port 8081 avec authentification
-httpd -p 8081 -h /tmp/record/ -r "auth" -c "$conffile"
+# Le serveur HTTPD
+httpd -p 8081 -h /tmp/record/ -r "auth" -c /tmp/httpd.conf
 
 # ---------------------------------
 # Boucle pour lancer ffmpeg en continu
