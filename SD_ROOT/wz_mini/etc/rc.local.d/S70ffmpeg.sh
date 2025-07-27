@@ -28,11 +28,13 @@ httpd -p 8081 -h /tmp/record/ -r "auth" -c /tmp/httpd.conf
 # ---------------------------------
 
 cmd="/opt/wz_mini/bin/ffmpeg -rtsp_transport tcp -y -i rtsp://127.0.0.1:8554/1080p \
-  -c:v copy -pix_fmt yuv420p -g 30 -bf 0 \
-  -f segment \
-  -segment_list /tmp/record/playlist/list.txt -segment_list_type flat \
-  -segment_list_size 5 -segment_wrap 5 -segment_time 10 -reset_timestamps 1 \
-  /tmp/record/stream_%d.mp4 -hide_banner -loglevel error"
+    -map 0:v:0 -map 0:a:0 \
+    -c:v copy \
+    -c:a copy \
+    -f segment \
+    -segment_list /tmp/record/playlist/list.txt -segment_list_type flat \
+    -segment_list_size 5 -segment_wrap 5 -segment_time 10 -reset_timestamps 1 \
+    /tmp/record/stream_%d.mp4 -hide_banner -loglevel error"
 
 LOGFILE="/tmp/ffmpeg_loop.log"
 MAX_ATTEMPTS=10
