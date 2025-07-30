@@ -9,15 +9,15 @@
 . /opt/wz_mini/wz_mini.conf
 
 GO2RTC=/opt/wz_mini/log/go2rtc
-if [[ -e $GO2RTC.log || -L $GO2RTC.log ]] ; then
-	i=0
-	while [[ -e $GO2RTC.log.$i || -L $GO2RTC.log.$i ]] ; do
-		let i++
-	done
-	mv $GO2RTC.log $GO2RTC.log.$i
-	GO2RTC=$GO2RTC
-fi
-touch -- "$GO2RTC".log
+# if [[ -e $GO2RTC.log || -L $GO2RTC.log ]] ; then
+# 	i=0
+# 	while [[ -e $GO2RTC.log.$i || -L $GO2RTC.log.$i ]] ; do
+# 		let i++
+# 	done
+# 	mv $GO2RTC.log $GO2RTC.log.$i
+# 	GO2RTC=$GO2RTC
+# fi
+# touch -- "$GO2RTC".log
 
 
 case "$1" in
@@ -79,7 +79,7 @@ case "$1" in
 
 			attempts=0
 			while true; do
-				SSL_CERT_FILE=/opt/wz_mini/etc/ssl/ca-bundle.crt /opt/wz_mini/bin/go2rtc_linux_mipsel -config /opt/wz_mini/etc/go2rtc.yml > $GO2RTC.log 2>&1 &
+				SSL_CERT_FILE=/opt/wz_mini/etc/ssl/ca-bundle.crt /opt/wz_mini/bin/go2rtc_linux_mipsel -config /opt/wz_mini/etc/go2rtc.yml > /dev/null 2>&1 &
 				pid=$!
 				wait $pid
 				exit_status=$?
