@@ -12,3 +12,7 @@ mkdir -p "$PLAYLIST_DIR"
 chmod -R 777 "$BASE_DIR"
 
 echo "Dossiers créés et permissions définies dans $BASE_DIR"
+
+# noatime et nodiratime évite de réécrire la date d’accès à chaque lecture pour prevenir les écritures
+mount -o remount,rw,noatime,nodiratime /opt
+
