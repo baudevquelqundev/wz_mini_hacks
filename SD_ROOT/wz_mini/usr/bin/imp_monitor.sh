@@ -13,7 +13,7 @@ check() {
         rcMode=$(echo "$output" | grep -A 32 "CHANNEL $i" | grep "rcMode" | awk -F '[=()]' '{print $2}' | xargs)
         uTargetBitRate=$(echo "$output" | grep -A 32 "CHANNEL $i" | grep "uTargetBitRate" | awk -F '[=()]' '{print $2}' | xargs)
         uMaxBitRate=$(echo "$output" | grep -A 32 "CHANNEL $i" | grep "uMaxBitRate" | awk -F '[=()]' '{print $2}' | xargs)
-        echo "Channel $i: rcMode=$rcMode, uTargetBitRate=$uTargetBitRate, uMaxBitRate=$uMaxBitRate"
+        # echo "Channel $i: rcMode=$rcMode, uTargetBitRate=$uTargetBitRate, uMaxBitRate=$uMaxBitRate"
         eval desired_rcMode=\$VIDEO_${i}_ENC_PARAMETER
         eval desired_uTargetBitRate=\$VIDEO_${i}_TARGET_BITRATE
         eval desired_uMaxBitRate=\$VIDEO_${i}_MAX_BITRATE
@@ -88,12 +88,12 @@ daemon_loop() {
     echo "Starting daemon with PID $$"
 
     while true; do
-        echo $(date)
-        echo "Checking values..."
+        # echo $(date)
+        # echo "Checking values..."
         check
         if [ $? -eq 1 ]; then
-            echo $(date)
-            echo "Setting values..."
+            # echo $(date)
+            # echo "Setting values..."
             set_values
         fi
         sleep $INTERVAL
